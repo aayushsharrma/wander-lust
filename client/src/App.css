@@ -61,6 +61,25 @@ body {
   max-width: 1200px;
 }
 
+/* ✨ NEW: CREATOR LOGO AYUH STYLING ✨ */
+.creator-logo {
+  position: absolute;
+  top: 25px;
+  right: 35px;
+  font-family: 'Dancing Script', cursive;
+  /* Stylish Signature Font */
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 700;
+  /* White Glow Effect */
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: rotate(-5deg);
+  /* Thoda sa stylish tilt */
+  z-index: 10;
+  pointer-events: none;
+
+}
+
 /* HEADER */
 .logo-group {
   display: flex;

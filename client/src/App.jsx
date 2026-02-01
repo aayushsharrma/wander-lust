@@ -41,14 +41,15 @@ function App() {
   return (
     <div className="app-container">
       <div className={`glass-card ${itinerary ? 'expanded' : ''}`}>
-
+        {/* ✨ NEW: CREATOR LOGO AYUH ✨ */}
+        <div className="creator-logo">Ayuh</div>
         <header>
           <div className="logo-group">
             <span className="logo-icon">✈️</span>
             <h1>WANDER-LUST</h1>
             <span className="logo-icon">🌍</span>
           </div>
-          <p>AI-Powered India Travel Planner</p>
+          <p>!AI-Powered and Personal India Travel Itinerary!</p>
         </header>
 
         <div className="controls">

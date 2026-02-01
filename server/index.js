@@ -107,57 +107,83 @@ const cityDatabase = {
         faqs: [{ q: "Famous for?", a: "Sports Goods & History." }, { q: "Best food?", a: "Nankhatai." }]
     }
 };
-
-// --- 🌤️ ULTIMATE WEATHER FUNCTION (3 Layers) ---
-async function getWeather(city, dbCoords) {
+const capitalCoordinates = {
+    "port blair": { lat: 11.6234, lon: 92.7265 },
+    "amaravati": { lat: 16.5131, lon: 80.5165 },
+    "itanagar": { lat: 27.0844, lon: 93.6053 },
+    "dispur": { lat: 26.1433, lon: 91.7898 },
+    "patna": { lat: 25.5941, lon: 85.1376 },
+    "chandigarh": { lat: 30.7333, lon: 76.7794 },
+    "raipur": { lat: 21.2514, lon: 81.6296 },
+    "silvassa": { lat: 20.2763, lon: 73.0083 },
+    "new delhi": { lat: 28.6139, lon: 77.2090 },
+    "delhi": { lat: 28.6139, lon: 77.2090 },
+    "panaji": { lat: 15.4909, lon: 73.8278 },
+    "gandhinagar": { lat: 23.2156, lon: 72.6369 },
+    "shimla": { lat: 31.1048, lon: 77.1734 },
+    "srinagar": { lat: 34.0837, lon: 74.7973 },
+    "jammu": { lat: 32.7266, lon: 74.8570 },
+    "ranchi": { lat: 23.3441, lon: 85.3096 },
+    "bengaluru": { lat: 12.9716, lon: 77.5946 },
+    "bangalore": { lat: 12.9716, lon: 77.5946 },
+    "thiruvananthapuram": { lat: 8.5241, lon: 76.9366 },
+    "kavaratti": { lat: 10.5667, lon: 72.6417 },
+    "bhopal": { lat: 23.2599, lon: 77.4126 },
+    "mumbai": { lat: 19.0760, lon: 72.8777 },
+    "imphal": { lat: 24.8170, lon: 93.9368 },
+    "shillong": { lat: 25.5788, lon: 91.8933 },
+    "aizawl": { lat: 23.7307, lon: 92.7173 },
+    "kohima": { lat: 25.6751, lon: 94.1086 },
+    "bhubaneswar": { lat: 20.2961, lon: 85.8245 },
+    "puducherry": { lat: 11.9416, lon: 79.8083 },
+    "jaipur": { lat: 26.9124, lon: 75.7873 },
+    "gangtok": { lat: 27.3314, lon: 88.6138 },
+    "chennai": { lat: 13.0827, lon: 80.2707 },
+    "hyderabad": { lat: 17.3850, lon: 78.4867 },
+    "agartala": { lat: 23.8315, lon: 91.2868 },
+    "lucknow": { lat: 26.8467, lon: 80.9462 },
+    "dehradun": { lat: 30.3165, lon: 78.0322 },
+    "kolkata": { lat: 22.5726, lon: 88.3639 },
+    "leh": { lat: 34.1526, lon: 77.5770 }
+};
+// --- 🌤️ WEATHER ENGINE ---
+async function getWeather(city, fixedCoords) {
     try {
         let latitude, longitude;
 
-        // LAYER 1: Database Check (Best)
-        if (dbCoords && dbCoords.lat && dbCoords.lon) {
-            latitude = dbCoords.lat;
-            longitude = dbCoords.lon;
+        // Check 1: Curated Database
+        if (fixedCoords && fixedCoords.lat) {
+            latitude = fixedCoords.lat;
+            longitude = fixedCoords.lon;
         }
-        // LAYER 2: Geocoding API (For unknown cities)
+        // Check 2: Capital Cities List
+        else if (capitalCoordinates[city]) {
+            latitude = capitalCoordinates[city].lat;
+            longitude = capitalCoordinates[city].lon;
+        }
+        // Check 3: Geocoding API (Fallback)
         else {
-            const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-            const geoRes = await fetch(geoUrl);
+            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
             const geoData = await geoRes.json();
-
-            if (!geoData.results || geoData.results.length === 0) {
-                throw new Error("City not found");
-            }
+            if (!geoData.results) throw new Error("City not found");
             latitude = geoData.results[0].latitude;
             longitude = geoData.results[0].longitude;
         }
 
-        // Fetch Weather using Lat/Lon
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
-        const weatherRes = await fetch(weatherUrl);
-        const weatherData = await weatherRes.json();
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+        const data = await weatherRes.json();
 
-        const temp = weatherData.current_weather.temperature;
-        const code = weatherData.current_weather.weathercode;
+        const temp = data.current_weather.temperature;
+        const code = data.current_weather.weathercode;
 
-        // Code to Emoji
-        let cond = "Clear";
-        let emoji = "☀️";
-        if (code >= 1 && code <= 3) { cond = "Cloudy"; emoji = "☁️"; }
-        else if (code >= 45 && code <= 48) { cond = "Foggy"; emoji = "🌫️"; }
-        else if (code >= 51 && code <= 67) { cond = "Rainy"; emoji = "🌧️"; }
-        else if (code >= 71 && code <= 77) { cond = "Snowy"; emoji = "❄️"; }
-        else if (code >= 95) { cond = "Storm"; emoji = "⛈️"; }
+        let cond = "Clear", emoji = "☀️";
+        if (code > 3) { cond = "Cloudy"; emoji = "☁️"; }
+        if (code > 45) { cond = "Foggy"; emoji = "🌫️"; }
+        if (code > 50) { cond = "Rainy"; emoji = "🌧️"; }
+        if (code > 70) { cond = "Snowy"; emoji = "❄️"; }
 
-        // Formatting Name
-        const displayName = city.charAt(0).toUpperCase() + city.slice(1);
-
-        return {
-            temp: `${temp}°C`,
-            cond: `${cond} ${emoji}`,
-            text: `Live in ${displayName}`
-        };
-
-    } catch (error) {
+        return { temp: `${temp}°C`, cond: `${cond} ${emoji}`, text: `Live in ${city}` };
+    } catch (e) {
         console.error(`Primary Weather Failed for ${city}, trying Backup...`);
 
         // LAYER 3: wttr.in BACKUP (Never show "Server Busy")
