@@ -26,7 +26,8 @@ function App() {
     if (!formData.location) { setError("Please enter a city!"); return; }
     setLoading(true); setError(''); setItinerary(null);
     try {
-      const res = await axios.post('http://localhost:5000/api/plan', formData);
+      // Example URL, apni wali use karna
+      const res = await axios.post('https://wander-lust-fcyz.onrender.com/api/plan', formData);
       if (res.data.success) {
         setItinerary(res.data);
         setActivePlace(formData.location);

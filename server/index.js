@@ -13,9 +13,22 @@ mongoose.connect('mongodb://127.0.0.1:27017/wanderlust')
     .then(() => console.log("✅ MongoDB Connected"))
     .catch(err => console.log("❌ DB Error:", err));
 
-// --- 🧠 CITY DATABASE (Places & FAQs) ---
+// --- 🧠 CITY DATABASE (With Exact Coordinates) ---
 const cityDatabase = {
+    "manali": {
+        // Himachal Pradesh Coordinates
+        lat: 32.2396, lon: 77.1887,
+        places: [
+            { name: "Solang Valley", type: "Adventure", cost: 1000 },
+            { name: "Hidimba Temple", type: "Spiritual", cost: 0 },
+            { name: "Mall Road", type: "City", cost: 500 },
+            { name: "Jogini Falls", type: "Nature", cost: 0 },
+            { name: "Old Manali", type: "City", cost: 0 }
+        ],
+        faqs: [{ q: "Snow?", a: "Dec-Feb." }, { q: "Clothes?", a: "Heavy Woolens." }]
+    },
     "rishikesh": {
+        lat: 30.0869, lon: 78.2676,
         places: [
             { name: "Laxman Jhula", type: "City", cost: 0 },
             { name: "River Rafting", type: "Adventure", cost: 1500 },
@@ -26,6 +39,7 @@ const cityDatabase = {
         faqs: [{ q: "Rafting age?", a: "14+" }, { q: "Alcohol?", a: "Prohibited." }]
     },
     "nainital": {
+        lat: 29.3919, lon: 79.4542,
         places: [
             { name: "Naini Lake", type: "Nature", cost: 300 },
             { name: "Naina Devi", type: "Spiritual", cost: 0 },
@@ -36,6 +50,7 @@ const cityDatabase = {
         faqs: [{ q: "Is it cold?", a: "Yes, carry jackets." }, { q: "Best view?", a: "Snow View Point." }]
     },
     "goa": {
+        lat: 15.2993, lon: 74.1240,
         places: [
             { name: "Calangute Beach", type: "Beach", cost: 0 },
             { name: "Tito's Club", type: "Party", cost: 2000 },
@@ -46,6 +61,7 @@ const cityDatabase = {
         faqs: [{ q: "Rent bike?", a: "₹400/day." }, { q: "Best season?", a: "Nov-Feb." }]
     },
     "udaipur": {
+        lat: 24.5854, lon: 73.7125,
         places: [
             { name: "City Palace", type: "History", cost: 400 },
             { name: "Lake Pichola", type: "Nature", cost: 500 },
@@ -55,17 +71,8 @@ const cityDatabase = {
         ],
         faqs: [{ q: "Romantic spot?", a: "Ambrai Ghat." }, { q: "Food?", a: "Dal Baati Churma." }]
     },
-    "manali": {
-        places: [
-            { name: "Solang Valley", type: "Adventure", cost: 1000 },
-            { name: "Hidimba Temple", type: "Spiritual", cost: 0 },
-            { name: "Mall Road", type: "City", cost: 500 },
-            { name: "Jogini Falls", type: "Nature", cost: 0 },
-            { name: "Old Manali", type: "City", cost: 0 }
-        ],
-        faqs: [{ q: "Snow?", a: "Dec-Feb." }, { q: "Clothes?", a: "Heavy Woolens." }]
-    },
     "meerut": {
+        lat: 28.9845, lon: 77.7064,
         places: [
             { name: "Augarnath Temple", type: "Spiritual", cost: 0 },
             { name: "Gandhi Bagh", type: "Nature", cost: 20 },
@@ -76,6 +83,7 @@ const cityDatabase = {
         faqs: [{ q: "Famous for?", a: "Sports Goods & History." }, { q: "Best food?", a: "Nankhatai." }]
     },
     "pune": {
+        lat: 18.5204, lon: 73.8567,
         places: [
             { name: "Shaniwar Wada", type: "History", cost: 50 },
             { name: "Aga Khan Palace", type: "History", cost: 50 },
@@ -87,22 +95,32 @@ const cityDatabase = {
     }
 };
 
-// --- 🌤️ ROBUST WEATHER FUNCTION (Open-Meteo + Backup) ---
-async function getWeather(city) {
+// --- 🌤️ EXACT LOCATION WEATHER FUNCTION ---
+async function getWeather(city, dbCoords) {
     try {
-        // STEP 1: Geocoding (City -> Lat/Lon)
-        // Ye API free hai aur exact location dhoondti hai
-        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-        const geoRes = await fetch(geoUrl);
-        const geoData = await geoRes.json();
+        let latitude, longitude, name;
 
-        if (!geoData.results || geoData.results.length === 0) {
-            throw new Error("City not found in Geocoding");
+        // METHOD 1: Agar Database mein Coordinates hain toh wahin use karo (100% Accurate)
+        if (dbCoords && dbCoords.lat && dbCoords.lon) {
+            latitude = dbCoords.lat;
+            longitude = dbCoords.lon;
+            name = city; // Naam wahi rakho jo user ne dala
+        }
+        // METHOD 2: Agar naya shehar hai, toh search karo (Lekin India laga ke)
+        else {
+            const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city + " India")}&count=1&language=en&format=json`;
+            const geoRes = await fetch(geoUrl);
+            const geoData = await geoRes.json();
+
+            if (!geoData.results || geoData.results.length === 0) {
+                throw new Error("City not found");
+            }
+            latitude = geoData.results[0].latitude;
+            longitude = geoData.results[0].longitude;
+            name = geoData.results[0].name;
         }
 
-        const { latitude, longitude, name } = geoData.results[0];
-
-        // STEP 2: Weather Fetching
+        // Fetch Exact Weather
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
         const weatherRes = await fetch(weatherUrl);
         const weatherData = await weatherRes.json();
@@ -110,11 +128,10 @@ async function getWeather(city) {
         const temp = weatherData.current_weather.temperature;
         const code = weatherData.current_weather.weathercode;
 
-        // STEP 3: Code to Emoji Mapping
+        // Code Interpretation
         let cond = "Clear";
         let emoji = "☀️";
 
-        // WMO Weather interpretation codes
         if (code >= 1 && code <= 3) { cond = "Cloudy"; emoji = "☁️"; }
         else if (code >= 45 && code <= 48) { cond = "Foggy"; emoji = "🌫️"; }
         else if (code >= 51 && code <= 67) { cond = "Rainy"; emoji = "🌧️"; }
@@ -122,36 +139,17 @@ async function getWeather(city) {
         else if (code >= 80 && code <= 82) { cond = "Showers"; emoji = "🌦️"; }
         else if (code >= 95) { cond = "Thunderstorm"; emoji = "⛈️"; }
 
+        // Capitalize Name properly
+        const displayName = city.charAt(0).toUpperCase() + city.slice(1);
+
         return {
             temp: `${temp}°C`,
             cond: `${cond} ${emoji}`,
-            text: `Live in ${name}`
+            text: `Live in ${displayName}`
         };
 
     } catch (error) {
-        console.error("Open-Meteo failed, trying backup:", error.message);
-
-        // BACKUP: wttr.in (Simple text fallback)
-        try {
-            const backupRes = await fetch(`https://wttr.in/${city}?format=%t+%C`);
-            if (backupRes.ok) {
-                const text = await backupRes.text(); // e.g., "+24°C Sunny"
-                // Basic cleanup
-                const parts = text.trim().split(" ");
-                const temp = parts[0] || "--";
-                const cond = parts.slice(1).join(" ") || "Unknown";
-
-                return {
-                    temp: temp,
-                    cond: `${cond} 🌤️`,
-                    text: "Live Report (Backup)"
-                };
-            }
-        } catch (e) {
-            console.error("Backup failed too");
-        }
-
-        // Last Resort (Should almost never happen)
+        console.error("Weather failed:", error.message);
         return { temp: "--", cond: "Unavailable", text: "Server Busy" };
     }
 }
@@ -172,14 +170,16 @@ app.post('/api/plan', async (req, res) => {
     const { location, days, budget } = req.body;
     const cityKey = location.toLowerCase().trim();
 
-    console.log(`🚀 Generating Plan for: ${location}`);
+    console.log(`🚀 Plan requested for: ${location}`);
 
-    // 1. Get Data
+    // 1. Get Data from DB
     let dbData = cityDatabase[cityKey];
-    if (!dbData) dbData = generateGenericPlan(location);
 
-    // 2. Get ROBUST Weather
-    const weather = await getWeather(location);
+    // 2. Get Weather (Pass DB coordinates if available)
+    const weather = await getWeather(location, dbData); // Yahan dbData pass kiya
+
+    // Fallback for Places if not in DB
+    if (!dbData) dbData = generateGenericPlan(location);
 
     // 3. Plan Logic
     const dailyBudget = budget / days;
@@ -202,7 +202,7 @@ app.post('/api/plan', async (req, res) => {
         success: true,
         plan,
         totalCost: currentCost,
-        aiDescription: `Explore the beauty of ${location}! ✨`,
+        aiDescription: `Explore the magic of ${location}! ✨`,
         weather: weather,
         faqs: dbData.faqs
     });
