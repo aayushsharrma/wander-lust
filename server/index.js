@@ -8,16 +8,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// MongoDB Connection
-mongoose.connect('mongodb://127.0.0.1:27017/wanderlust')
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch(err => console.log("❌ DB Error:", err));
-
-// --- 🧠 CITY DATABASE (Expanded with Coordinates) ---
-const cityDatabase = {
-    // HIMACHAL
+// --- 🧠 1. CURATED DATABASE (Added Language Field) ---
+const curatedCities = {
     "manali": {
         lat: 32.2396, lon: 77.1887,
+        language: { hello: "Namaste", thank: "Dhanyavaad", native: "Hindi/Pahadi" },
         places: [
             { name: "Solang Valley", type: "Adventure", cost: 1000 },
             { name: "Hidimba Temple", type: "Spiritual", cost: 0 },
@@ -27,7 +22,42 @@ const cityDatabase = {
         ],
         faqs: [{ q: "Snow?", a: "Dec-Feb." }, { q: "Clothes?", a: "Heavy Woolens." }]
     },
-    // UTTARAKHAND
+    "goa": {
+        lat: 15.2993, lon: 74.1240,
+        language: { hello: "Deo Boro Dis Divum", thank: "Dev Borem Korum", native: "Konkani" },
+        places: [
+            { name: "Calangute Beach", type: "Beach", cost: 0 },
+            { name: "Tito's Club", type: "Party", cost: 2000 },
+            { name: "Fort Aguada", type: "History", cost: 300 },
+            { name: "Dudhsagar Falls", type: "Nature", cost: 500 },
+            { name: "Anjuna Market", type: "Shopping", cost: 0 }
+        ],
+        faqs: [{ q: "Rent bike?", a: "₹400/day." }, { q: "Best season?", a: "Nov-Feb." }]
+    },
+    "kerala": {
+        lat: 10.8505, lon: 76.2711,
+        language: { hello: "Namaskaram", thank: "Nanni", native: "Malayalam" },
+        places: [
+            { name: "Alleppey Houseboat", type: "Nature", cost: 5000 },
+            { name: "Munnar Tea Gardens", type: "Nature", cost: 200 },
+            { name: "Varkala Beach", type: "Beach", cost: 0 },
+            { name: "Kochi Fort", type: "History", cost: 100 },
+            { name: "Periyar Wildlife", type: "Adventure", cost: 500 }
+        ],
+        faqs: [{ q: "Best time?", a: "Sep-March." }, { q: "Food?", a: "Try Sadya." }]
+    },
+    "udaipur": {
+        lat: 24.5854, lon: 73.7125,
+        language: { hello: "Khamma Ghani", thank: "Dhanyavaad", native: "Rajasthani" },
+        places: [
+            { name: "City Palace", type: "History", cost: 400 },
+            { name: "Lake Pichola", type: "Nature", cost: 500 },
+            { name: "Jag Mandir", type: "History", cost: 300 },
+            { name: "Fateh Sagar", type: "Nature", cost: 0 },
+            { name: "Vintage Car Museum", type: "History", cost: 250 }
+        ],
+        faqs: [{ q: "Romantic spot?", a: "Ambrai Ghat." }, { q: "Food?", a: "Dal Baati Churma." }]
+    },
     "auli": {
         lat: 30.5303, lon: 79.5649,
         places: [
@@ -72,29 +102,6 @@ const cityDatabase = {
         ],
         faqs: [{ q: "Is it cold?", a: "Yes, carry jackets." }, { q: "Best view?", a: "Snow View Point." }]
     },
-    // OTHERS
-    "goa": {
-        lat: 15.2993, lon: 74.1240,
-        places: [
-            { name: "Calangute Beach", type: "Beach", cost: 0 },
-            { name: "Tito's Club", type: "Party", cost: 2000 },
-            { name: "Fort Aguada", type: "History", cost: 300 },
-            { name: "Dudhsagar Falls", type: "Nature", cost: 500 },
-            { name: "Anjuna Market", type: "Shopping", cost: 0 }
-        ],
-        faqs: [{ q: "Rent bike?", a: "₹400/day." }, { q: "Best season?", a: "Nov-Feb." }]
-    },
-    "udaipur": {
-        lat: 24.5854, lon: 73.7125,
-        places: [
-            { name: "City Palace", type: "History", cost: 400 },
-            { name: "Lake Pichola", type: "Nature", cost: 500 },
-            { name: "Jag Mandir", type: "History", cost: 300 },
-            { name: "Fateh Sagar", type: "Nature", cost: 0 },
-            { name: "Vintage Car Museum", type: "History", cost: 250 }
-        ],
-        faqs: [{ q: "Romantic spot?", a: "Ambrai Ghat." }, { q: "Food?", a: "Dal Baati Churma." }]
-    },
     "meerut": {
         lat: 28.9845, lon: 77.7064,
         places: [
@@ -107,6 +114,7 @@ const cityDatabase = {
         faqs: [{ q: "Famous for?", a: "Sports Goods & History." }, { q: "Best food?", a: "Nankhatai." }]
     }
 };
+
 const capitalCoordinates = {
     "port blair": { lat: 11.6234, lon: 92.7265 },
     "amaravati": { lat: 16.5131, lon: 80.5165 },
@@ -146,28 +154,18 @@ const capitalCoordinates = {
     "kolkata": { lat: 22.5726, lon: 88.3639 },
     "leh": { lat: 34.1526, lon: 77.5770 }
 };
-// --- 🌤️ WEATHER ENGINE ---
+
+// --- 🌤️ WEATHER ENGINE (Same as before) ---
 async function getWeather(city, fixedCoords) {
     try {
         let latitude, longitude;
-
-        // Check 1: Curated Database
         if (fixedCoords && fixedCoords.lat) {
-            latitude = fixedCoords.lat;
-            longitude = fixedCoords.lon;
-        }
-        // Check 2: Capital Cities List
-        else if (capitalCoordinates[city]) {
-            latitude = capitalCoordinates[city].lat;
-            longitude = capitalCoordinates[city].lon;
-        }
-        // Check 3: Geocoding API (Fallback)
-        else {
+            latitude = fixedCoords.lat; longitude = fixedCoords.lon;
+        } else {
             const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
             const geoData = await geoRes.json();
             if (!geoData.results) throw new Error("City not found");
-            latitude = geoData.results[0].latitude;
-            longitude = geoData.results[0].longitude;
+            latitude = geoData.results[0].latitude; longitude = geoData.results[0].longitude;
         }
 
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
@@ -184,75 +182,41 @@ async function getWeather(city, fixedCoords) {
 
         return { temp: `${temp}°C`, cond: `${cond} ${emoji}`, text: `Live in ${city}` };
     } catch (e) {
-        console.error(`Primary Weather Failed for ${city}, trying Backup...`);
-
-        // LAYER 3: wttr.in BACKUP (Never show "Server Busy")
-        try {
-            const backupRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=%t+%C`);
-            if (backupRes.ok) {
-                const text = await backupRes.text(); // e.g., "+15°C Sunny"
-                // Clean up string
-                const cleanText = text.replace('+', '').trim();
-                const parts = cleanText.split(' ');
-                const temp = parts[0] || "20°C";
-                const cond = parts.slice(1).join(' ') || "Fair";
-
-                return {
-                    temp: temp,
-                    cond: `${cond} 🌤️`,
-                    text: `Live Report`
-                };
-            }
-        } catch (e) {
-            console.error("Backup Failed");
-        }
-
-        // Absolute Last Resort (Very Rare)
-        return { temp: "--", cond: "Unavailable", text: "Try again" };
+        return { temp: "--", cond: "Unavailable", text: "Server Busy" };
     }
 }
 
-// --- GENERIC PLAN GENERATOR ---
+// --- GENERIC GENERATOR (With Default Language) ---
 const generateGenericPlan = (city) => ({
+    language: { hello: "Namaste", thank: "Thank You", native: "Hindi/English" },
     places: [
+        { name: `${city} Main Market`, type: "Shopping", cost: 1000 },
         { name: `${city} City Center`, type: "City", cost: 500 },
-        { name: `${city} Local Market`, type: "Shopping", cost: 1000 },
         { name: `${city} Famous Temple`, type: "Spiritual", cost: 0 },
-        { name: `${city} Nature Park`, type: "Nature", cost: 50 },
-        { name: `${city} Historical Site`, type: "History", cost: 200 }
+        { name: `${city} Local Park`, type: "Nature", cost: 50 },
+        { name: `${city} Museum`, type: "History", cost: 200 }
     ],
-    faqs: [{ q: `Best time?`, a: "Oct-March." }, { q: "Transport?", a: "Local cabs." }]
+    faqs: [{ q: `Best time to visit?`, a: "Oct-March is ideal." }, { q: "Local transport?", a: "Autos and Cabs available." }]
 });
 
 app.post('/api/plan', async (req, res) => {
     const { location, days, budget } = req.body;
     const cityKey = location.toLowerCase().trim();
 
-    console.log(`🚀 Plan requested for: ${location}`);
-
-    // 1. Database Data
-    let dbData = cityDatabase[cityKey];
-
-    // 2. Weather (Pass DB Coords if available)
-    const weather = await getWeather(location, dbData);
-
-    // Fallback if city not in DB
+    let dbData = curatedCities[cityKey];
     if (!dbData) dbData = generateGenericPlan(location);
 
-    // 3. Plan Logic
+    const weather = await getWeather(cityKey, dbData);
+
     const dailyBudget = budget / days;
     const finalPlaces = dbData.places.filter(p => p.cost <= dailyBudget + 5000);
+    const placesToUse = finalPlaces.length > 0 ? finalPlaces : dbData.places;
 
     const plan = [];
     let currentCost = 0;
     for (let i = 0; i < days; i++) {
-        const place = finalPlaces[i % finalPlaces.length];
-        plan.push({
-            day: i + 1,
-            place: place.name,
-            activity: place.type,
-            cost: place.cost
-        });
+        const place = placesToUse[i % placesToUse.length];
+        plan.push({ day: i + 1, place: place.name, activity: place.type, cost: place.cost });
         currentCost += place.cost;
     }
 
@@ -260,9 +224,10 @@ app.post('/api/plan', async (req, res) => {
         success: true,
         plan,
         totalCost: currentCost,
-        aiDescription: `Explore ${location}! ✨`,
+        aiDescription: `Explore the amazing ${location}! ✨`,
         weather: weather,
-        faqs: dbData.faqs
+        faqs: dbData.faqs,
+        language: dbData.language // Sending Language Data
     });
 });
 

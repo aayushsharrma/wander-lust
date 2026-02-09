@@ -1,18 +1,14 @@
 /* client/src/App.css */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Dancing+Script:wght@700&display=swap');
 
-/* --- 1. ANIMATED BACKGROUND (Colors Hamesha Change Honge) --- */
+/* --- KEEP PREVIOUS GLOBAL STYLES --- */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Poppins', sans-serif;
-
-  /* Ye hai Magic Line 👇 */
   background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #ff4b2b, #ff416c);
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
-  /* 15 second mein color badlega */
-
   color: white;
   min-height: 100vh;
   display: flex;
@@ -41,12 +37,10 @@ body {
   justify-content: center;
 }
 
-/* GLASS CARD DESIGN */
 .glass-card {
+  position: relative;
   background: rgba(255, 255, 255, 0.05);
-  /* Transparent Dark */
   backdrop-filter: blur(16px);
-  /* Blur Effect */
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 40px;
@@ -58,34 +52,22 @@ body {
 }
 
 .glass-card.expanded {
-  max-width: 1200px;
+  max-width: 1250px;
 }
 
-/* ✨ NEW: CREATOR LOGO AYUH STYLING ✨ */
+/* HEADER */
 .creator-logo {
   position: absolute;
   top: 25px;
   right: 35px;
   font-family: 'Dancing Script', cursive;
-  /* Stylish Signature Font */
   color: white;
   font-size: 1.8rem;
   font-weight: 700;
-  /* White Glow Effect */
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 2px 5px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
   transform: rotate(-5deg);
-  /* Thoda sa stylish tilt */
   z-index: 10;
   pointer-events: none;
-
-}
-
-/* HEADER */
-.logo-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
 }
 
 h1 {
@@ -98,22 +80,36 @@ h1 {
   font-weight: 800;
 }
 
-.logo-icon {
-  font-size: 2rem;
-}
-
-header p {
-  text-align: center;
-  color: #aaa;
-  margin-bottom: 30px;
-  font-weight: 500;
-}
-
-/* CONTROLS (Inputs & Buttons) */
+/* CONTROLS */
 .controls {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.mic-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.2rem;
+  background: white;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+  color: #333;
+}
+
+.mic-icon:hover {
+  background: #ff4757;
+  color: white;
 }
 
 .row {
@@ -131,50 +127,19 @@ input {
   color: #333;
   font-size: 1rem;
   font-weight: 600;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-input:focus {
-  box-shadow: 0 0 0 3px #00c6ff;
-  transform: scale(1.01);
-}
-
-button {
+.main-btn {
   width: 100%;
   padding: 18px;
   border-radius: 12px;
   border: none;
   cursor: pointer;
   background: linear-gradient(to right, #ff416c, #ff4b2b);
-  /* Bright Red-Pink Button */
   color: white;
   font-weight: 800;
   font-size: 1.1rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: 0.3s;
-  box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
-}
-
-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(255, 65, 108, 0.6);
-}
-
-button:disabled {
-  background: #555;
-  cursor: not-allowed;
-}
-
-/* ERROR MESSAGE */
-.error {
-  background: rgba(255, 71, 87, 0.2);
-  color: #ff4757;
-  padding: 15px;
-  border-radius: 10px;
-  text-align: center;
-  margin-top: 20px;
-  border: 1px solid #ff4757;
 }
 
 /* DASHBOARD GRID */
@@ -182,108 +147,168 @@ button:disabled {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   gap: 25px;
-  margin-top: 40px;
+  margin-top: 20px;
   animation: slideUp 0.6s ease;
 }
 
-/* WEATHER CARD */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* WEATHER */
 .weather-card {
   background: linear-gradient(135deg, #00c6ff, #0072ff);
-  /* Electric Blue */
   padding: 25px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 114, 255, 0.4);
-  color: white;
-  margin-bottom: 20px;
 }
 
 .weather-card .temp {
   font-size: 3.5rem;
   font-weight: 800;
-  line-height: 1;
 }
 
-.weather-card .cond {
-  font-size: 1.5rem;
-  margin: 10px 0;
-  font-weight: 600;
-}
-
-.weather-card .text {
-  font-size: 1rem;
-  opacity: 0.9;
-}
-
-/* FAQ SECTION */
-.faq-box {
-  background: rgba(255, 255, 255, 0.08);
+/* 🗣️ LANGUAGE BOX */
+.lang-box {
+  background: rgba(0, 0, 0, 0.3);
   padding: 20px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.faq-box h3 {
-  color: #ff9f43;
+.lang-box h3 {
   margin-top: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 10px;
+  color: #feca57;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
 }
 
-.faq {
+.lang-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+/* 💰 EXPENSE TRACKER */
+.expense-box {
+  background: #1e1e2f;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #333;
+}
+
+.expense-box h3 {
+  margin-top: 0;
+  color: #2ed573;
+  text-align: center;
+}
+
+.budget-summary {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 15px;
+  background: #333;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.expense-input {
+  display: flex;
+  gap: 5px;
   margin-bottom: 15px;
 }
 
-.faq small {
-  color: #00c6ff;
+.expense-input input {
+  padding: 8px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.expense-input button {
+  background: #00c6ff;
+  border: none;
+  color: white;
+  width: 40px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.expense-list {
+  list-style: none;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.expense-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px dashed #444;
+  font-size: 0.9rem;
+}
+
+/* ACTION BUTTONS (PDF/SHARE) */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
   font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
 }
 
-.faq p {
-  margin: 5px 0 0;
-  font-size: 0.95rem;
-  color: #eee;
-  line-height: 1.4;
+.pdf-btn {
+  background: #e056fd;
 }
 
-/* ITINERARY LIST */
+.share-btn {
+  background: #f0932b;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  opacity: 0.9;
+}
+
+/* MAP & TIMELINE */
+.center {
+  overflow-y: auto;
+  max-height: 600px;
+  padding-right: 10px;
+}
+
 .vibe-check {
   background: #00b894;
-  /* Green Vibe Box */
   padding: 15px;
   border-radius: 15px;
   text-align: center;
-  color: white;
   font-weight: 700;
-  margin-bottom: 20px;
-  box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
-}
-
-.timeline-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
 }
 
 .card {
   background: #1e1e2f;
-  color: white;
   padding: 15px;
   border-radius: 15px;
   display: flex;
   align-items: center;
   gap: 15px;
-  cursor: pointer;
-  transition: 0.3s;
+  margin-top: 15px;
   border: 1px solid #333;
-}
-
-.card:hover {
-  transform: translateX(10px);
-  border-color: #ff416c;
-  background: #252538;
+  cursor: pointer;
 }
 
 .card-icon {
@@ -297,49 +322,13 @@ button:disabled {
   border-radius: 50%;
 }
 
-.card-info {
-  flex: 1;
-}
-
-.card-info h4 {
-  margin: 0 0 5px;
-  font-size: 1.1rem;
-}
-
-.meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: #aaa;
-  font-weight: bold;
-}
-
-.badge {
-  background: #333;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.cost {
-  color: #ff4757;
-  background: rgba(255, 71, 87, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-/* MAP */
-.panel.right iframe {
+.right iframe {
   width: 100%;
-  height: 100%;
-  min-height: 400px;
-  border: none;
+  height: 200px;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 4px solid #ff416c;
-  /* Neon Border around Map */
 }
 
-/* Animations */
 @keyframes slideUp {
   from {
     opacity: 0;
