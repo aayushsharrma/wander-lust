@@ -190,7 +190,7 @@ const capitalCoordinates = {
 };
 
 // --- 🌤️ WEATHER ENGINE (Same as before) ---
-async function getLocationData(city) {
+async function getWeathe(city) {
     try {
         let latitude, longitude, stateName;
 
