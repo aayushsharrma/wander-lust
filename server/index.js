@@ -8,6 +8,40 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// --- 🗺️ INDIA LANGUAGE & ZONE MAP ---
+const stateLanguages = {
+    // --- NORTH INDIA (Hindi Belt) ---
+    "Delhi": { native: "Hindi", hello: "Namaste 🙏", thank: "Dhanyavaad" },
+    "Uttar Pradesh": { native: "Hindi", hello: "Namaste 🙏", thank: "Dhanyavaad" },
+    "Haryana": { native: "Haryanvi", hello: "Ram Ram 🙏", thank: "Dhanyavaad" },
+    "Punjab": { native: "Punjabi", hello: "Sat Sri Akal 🙏", thank: "Dhanwad" },
+    "Himachal Pradesh": { native: "Pahadi", hello: "Namaste 🙏", thank: "Shukriya" },
+    "Uttarakhand": { native: "Garhwali", hello: "Pranam 🙏", thank: "Dhanyavaad" },
+    "Jammu and Kashmir": { native: "Kashmiri", hello: "Salaam", thank: "Shukriya" },
+    "Rajasthan": { native: "Rajasthani", hello: "Khamma Ghani 🙏", thank: "Dhanyavaad" },
+
+    // --- WEST INDIA ---
+    "Gujarat": { native: "Gujarati", hello: "Kem Cho? 👋", thank: "Aabhar" },
+    "Maharashtra": { native: "Marathi", hello: "Namaskar 🙏", thank: "Dhanyavaad" },
+    "Goa": { native: "Konkani", hello: "Deo Boro Dis Divum", thank: "Dev Borem Korum" },
+
+    // --- SOUTH INDIA ---
+    "Kerala": { native: "Malayalam", hello: "Namaskaram 🙏", thank: "Nanni" },
+    "Tamil Nadu": { native: "Tamil", hello: "Vanakkam 🙏", thank: "Nandri" },
+    "Karnataka": { native: "Kannada", hello: "Namaskara 🙏", thank: "Dhanyavadagalu" },
+    "Andhra Pradesh": { native: "Telugu", hello: "Namaskaram 🙏", thank: "Dhanyavadalu" },
+    "Telangana": { native: "Telugu", hello: "Namaskaram 🙏", thank: "Dhanyavadalu" },
+
+    // --- EAST INDIA ---
+    "West Bengal": { native: "Bengali", hello: "Nomoshkar 🙏", thank: "Dhanyabad" },
+    "Odisha": { native: "Odia", hello: "Namaskar 🙏", thank: "Dhanyabad" },
+    "Bihar": { native: "Bhojpuri/Hindi", hello: "Pranam 🙏", thank: "Dhanyavaad" },
+    "Assam": { native: "Assamese", hello: "Nomoshkar 🙏", thank: "Xobai" },
+
+    // --- DEFAULT FALLBACK ---
+    "General": { native: "Hindi/English", hello: "Namaste/Hello 👋", thank: "Thank You" }
+};
+
 // --- 🧠 1. CURATED DATABASE (Added Language Field) ---
 const curatedCities = {
     "manali": {

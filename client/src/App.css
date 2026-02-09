@@ -340,3 +340,128 @@ input {
     transform: translateY(0);
   }
 }
+
+/* --- PDF GENERATION MODE (Force High Contrast) --- */
+.pdf-mode {
+  background: white !important;
+  /* Background White karega */
+  color: black !important;
+  /* Text Black karega */
+  border: 2px solid #333;
+}
+
+.pdf-mode h1,
+.pdf-mode h2,
+.pdf-mode h3,
+.pdf-mode h4,
+.pdf-mode p,
+.pdf-mode .temp,
+.pdf-mode .cond,
+.pdf-mode .text,
+.pdf-mode .card-info,
+.pdf-mode .meta,
+.pdf-mode span,
+.pdf-mode strong {
+  color: black !important;
+  /* Saara text zabardasti Black karega */
+  text-shadow: none !important;
+  /* Glow effect hata dega */
+}
+
+.pdf-mode .card,
+.pdf-mode .weather-card,
+.pdf-mode .lang-box,
+.pdf-mode .expense-box {
+  background: #f0f0f0 !important;
+  /* Cards ka color light grey */
+  border: 1px solid #000 !important;
+  color: black !important;
+  box-shadow: none !important;
+}
+
+/* Save Button Styling (Green Color) */
+.save-btn {
+  background: #2ed573;
+}
+
+.save-btn:hover {
+  background: #26af61;
+}
+
+/* --- 📄 PROFESSIONAL PDF MODE --- */
+.pdf-mode {
+  background: white !important;
+  color: black !important;
+  border: none !important;
+  padding: 20px !important;
+}
+
+/* 1. NUCLEAR OPTION: Force ALL text to be Black */
+.pdf-mode * {
+  color: black !important;
+  text-shadow: none !important;
+  /* Glow effect hatao */
+  box-shadow: none !important;
+}
+
+/* 2. Cards ko Clean Borders do */
+.pdf-mode .card,
+.pdf-mode .weather-card,
+.pdf-mode .expense-box,
+.pdf-mode .lang-box,
+.pdf-mode .saved-card {
+  background: #fff !important;
+  /* Pure White Background */
+  border: 2px solid #333 !important;
+  /* Dark Border */
+  border-radius: 10px !important;
+  margin-bottom: 10px !important;
+  color: black !important;
+}
+
+/* 3. Text Visibility Fixes */
+.pdf-mode h1,
+.pdf-mode h2,
+.pdf-mode h3,
+.pdf-mode h4,
+.pdf-mode strong {
+  font-weight: 900 !important;
+  color: #000 !important;
+}
+
+.pdf-mode span,
+.pdf-mode p,
+.pdf-mode div,
+.pdf-mode input {
+  color: #000 !important;
+  font-weight: 600 !important;
+  /* Thoda bold taaki print mein dikhe */
+}
+
+/* 4. HIDE UNNECESSARY ITEMS IN PDF (Jadoo 🪄) */
+/* PDF mein Buttons, Input box, aur Nav nahi dikhenge */
+.pdf-mode .controls,
+.pdf-mode .nav-buttons,
+.pdf-mode .action-buttons,
+.pdf-mode .mic-icon {
+  display: none !important;
+}
+
+/* Header ko chota aur saaf karo */
+.pdf-mode header {
+  margin-bottom: 20px !important;
+  border-bottom: 2px solid black;
+  padding-bottom: 10px;
+}
+
+.pdf-mode h1 {
+  font-size: 2rem !important;
+  background: none !important;
+  -webkit-text-fill-color: black !important;
+  /* Gradient hatao */
+}
+
+/* Map ko Border do */
+.pdf-mode iframe {
+  border: 2px solid black !important;
+}
