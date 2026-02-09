@@ -193,42 +193,31 @@ const capitalCoordinates = {
 async function getLocationData(city) {
     try {
         let latitude, longitude, stateName;
-        const cityKey = city.toLowerCase().trim();
 
-        // CHECK 1: Agar Database mein hai (Fastest)
-        if (curatedCities[cityKey]) {
-            console.log(`✅ Found in DB: ${cityKey}`);
-            latitude = curatedCities[cityKey].lat;
-            longitude = curatedCities[cityKey].lon;
-            stateName = curatedCities[cityKey].state; // Use stored state
-        }
-        // CHECK 2: Agar nahi hai, toh API se pucho
-        else {
-            console.log(`🌍 Searching API for: ${city}`);
-            const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-            const geoRes = await fetch(geoUrl);
-            const geoData = await geoRes.json();
+        // Step 1: Check Geocoding API to find State & Coords
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+        const geoRes = await fetch(geoUrl);
+        const geoData = await geoRes.json();
 
-            if (geoData.results && geoData.results.length > 0) {
-                latitude = geoData.results[0].latitude;
-                longitude = geoData.results[0].longitude;
-                stateName = geoData.results[0].admin1; // API returns State Name (e.g. "Gujarat")
-                console.log(`📍 API Detected State: ${stateName}`);
+        if (geoData.results && geoData.results.length > 0) {
+            latitude = geoData.results[0].latitude;
+            longitude = geoData.results[0].longitude;
+            stateName = geoData.results[0].admin1; // Yahan se STATE milega (e.g., "Gujarat")
+        } else {
+            // Fallback for curated cities if API fails
+            if (curatedCities[city.toLowerCase()]) {
+                latitude = curatedCities[city.toLowerCase()].lat;
+                longitude = curatedCities[city.toLowerCase()].lon;
+                stateName = "General";
             } else {
                 throw new Error("City Not Found");
             }
         }
 
-        // --- LANGUAGE MATCHING ---
-        let langData = stateLanguages[stateName];
+        // Step 2: Determine Language based on State
+        let langData = stateLanguages[stateName] || stateLanguages["General"];
 
-        // Agar Exact Match nahi mila, toh "General" dedo par Log karo kyu fail hua
-        if (!langData) {
-            console.log(`⚠️ Language not found for state: "${stateName}". Using General.`);
-            langData = stateLanguages["General"];
-        }
-
-        // --- WEATHER FETCH ---
+        // Step 3: Get Weather
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
         const weatherRes = await fetch(weatherUrl);
         const weatherData = await weatherRes.json();
@@ -248,7 +237,7 @@ async function getLocationData(city) {
         };
 
     } catch (e) {
-        console.log("❌ Error in LocationData:", e.message);
+        console.log("Error:", e.message);
         return {
             weather: { temp: "--", cond: "Unavailable", text: "Server Busy" },
             language: stateLanguages["General"]
