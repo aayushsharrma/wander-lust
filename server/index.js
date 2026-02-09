@@ -190,33 +190,69 @@ const capitalCoordinates = {
 };
 
 // --- 🌤️ WEATHER ENGINE (Same as before) ---
-async function getWeather(city, fixedCoords) {
+async function getLocationData(city) {
     try {
-        let latitude, longitude;
-        if (fixedCoords && fixedCoords.lat) {
-            latitude = fixedCoords.lat; longitude = fixedCoords.lon;
-        } else {
-            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+        let latitude, longitude, stateName;
+        const cityKey = city.toLowerCase().trim();
+
+        // CHECK 1: Agar Database mein hai (Fastest)
+        if (curatedCities[cityKey]) {
+            console.log(`✅ Found in DB: ${cityKey}`);
+            latitude = curatedCities[cityKey].lat;
+            longitude = curatedCities[cityKey].lon;
+            stateName = curatedCities[cityKey].state; // Use stored state
+        }
+        // CHECK 2: Agar nahi hai, toh API se pucho
+        else {
+            console.log(`🌍 Searching API for: ${city}`);
+            const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+            const geoRes = await fetch(geoUrl);
             const geoData = await geoRes.json();
-            if (!geoData.results) throw new Error("City not found");
-            latitude = geoData.results[0].latitude; longitude = geoData.results[0].longitude;
+
+            if (geoData.results && geoData.results.length > 0) {
+                latitude = geoData.results[0].latitude;
+                longitude = geoData.results[0].longitude;
+                stateName = geoData.results[0].admin1; // API returns State Name (e.g. "Gujarat")
+                console.log(`📍 API Detected State: ${stateName}`);
+            } else {
+                throw new Error("City Not Found");
+            }
         }
 
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-        const data = await weatherRes.json();
+        // --- LANGUAGE MATCHING ---
+        let langData = stateLanguages[stateName];
 
-        const temp = data.current_weather.temperature;
-        const code = data.current_weather.weathercode;
+        // Agar Exact Match nahi mila, toh "General" dedo par Log karo kyu fail hua
+        if (!langData) {
+            console.log(`⚠️ Language not found for state: "${stateName}". Using General.`);
+            langData = stateLanguages["General"];
+        }
+
+        // --- WEATHER FETCH ---
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+        const weatherRes = await fetch(weatherUrl);
+        const weatherData = await weatherRes.json();
+
+        const temp = weatherData.current_weather.temperature;
+        const code = weatherData.current_weather.weathercode;
 
         let cond = "Clear", emoji = "☀️";
         if (code > 3) { cond = "Cloudy"; emoji = "☁️"; }
-        if (code > 45) { cond = "Foggy"; emoji = "🌫️"; }
-        if (code > 50) { cond = "Rainy"; emoji = "🌧️"; }
-        if (code > 70) { cond = "Snowy"; emoji = "❄️"; }
+        else if (code > 45) { cond = "Foggy"; emoji = "🌫️"; }
+        else if (code > 50) { cond = "Rainy"; emoji = "🌧️"; }
+        else if (code > 70) { cond = "Snowy"; emoji = "❄️"; }
 
-        return { temp: `${temp}°C`, cond: `${cond} ${emoji}`, text: `Live in ${city}` };
+        return {
+            weather: { temp: `${temp}°C`, cond: `${cond} ${emoji}`, text: `Live in ${city}` },
+            language: langData
+        };
+
     } catch (e) {
-        return { temp: "--", cond: "Unavailable", text: "Server Busy" };
+        console.log("❌ Error in LocationData:", e.message);
+        return {
+            weather: { temp: "--", cond: "Unavailable", text: "Server Busy" },
+            language: stateLanguages["General"]
+        };
     }
 }
 
