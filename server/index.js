@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
 const app = express();
 app.use(cors());
@@ -69,8 +70,10 @@ async function getLocationData(city) {
         else {
             console.log(`🌍 Searching API for: ${city}`);
             const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-            const geoRes = await fetch(geoUrl);
-            const geoData = await geoRes.json();
+
+            // ✅ USING AXIOS INSTEAD OF FETCH
+            const geoRes = await axios.get(geoUrl);
+            const geoData = geoRes.data;
 
             if (geoData.results && geoData.results.length > 0) {
                 latitude = geoData.results[0].latitude;
@@ -87,8 +90,10 @@ async function getLocationData(city) {
 
         // Weather Match
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
-        const weatherRes = await fetch(weatherUrl);
-        const weatherData = await weatherRes.json();
+
+        // ✅ USING AXIOS INSTEAD OF FETCH
+        const weatherRes = await axios.get(weatherUrl);
+        const weatherData = weatherRes.data;
 
         const temp = weatherData.current_weather.temperature;
         const code = weatherData.current_weather.weathercode;
@@ -105,7 +110,7 @@ async function getLocationData(city) {
         };
 
     } catch (e) {
-        console.log("❌ Location Error:", e.message);
+        console.log("❌ Location Error:", e.message); // Ye Render logs mein asli error batayega
         return {
             weather: { temp: "--", cond: "Unavailable", text: "Server Busy" },
             language: stateLanguages["General"]
