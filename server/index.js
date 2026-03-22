@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const axios = require('axios');
+const axios = require('axios'); // Axios implemented
 
 const app = express();
 app.use(cors());
@@ -11,7 +11,6 @@ app.use(bodyParser.json());
 
 // --- 🗺️ INDIA LANGUAGE & ZONE MAP ---
 const stateLanguages = {
-    // NORTH
     "Delhi": { native: "Hindi", hello: "Namaste 🙏", thank: "Dhanyavaad" },
     "Uttar Pradesh": { native: "Hindi", hello: "Namaste 🙏", thank: "Dhanyavaad" },
     "Haryana": { native: "Haryanvi", hello: "Ram Ram 🙏", thank: "Dhanyavaad" },
@@ -20,26 +19,18 @@ const stateLanguages = {
     "Uttarakhand": { native: "Garhwali", hello: "Pranam 🙏", thank: "Dhanyavaad" },
     "Jammu and Kashmir": { native: "Kashmiri", hello: "Salaam", thank: "Shukriya" },
     "Rajasthan": { native: "Rajasthani", hello: "Khamma Ghani 🙏", thank: "Dhanyavaad" },
-
-    // WEST
     "Gujarat": { native: "Gujarati", hello: "Kem Cho? 👋", thank: "Aabhar" },
     "Maharashtra": { native: "Marathi", hello: "Namaskar 🙏", thank: "Dhanyavaad" },
     "Goa": { native: "Konkani", hello: "Deo Boro Dis Divum", thank: "Dev Borem Korum" },
-
-    // SOUTH
     "Kerala": { native: "Malayalam", hello: "Namaskaram 🙏", thank: "Nanni" },
     "Tamil Nadu": { native: "Tamil", hello: "Vanakkam 🙏", thank: "Nandri" },
     "Karnataka": { native: "Kannada", hello: "Namaskara 🙏", thank: "Dhanyavadagalu" },
     "Andhra Pradesh": { native: "Telugu", hello: "Namaskaram 🙏", thank: "Dhanyavadalu" },
     "Telangana": { native: "Telugu", hello: "Namaskaram 🙏", thank: "Dhanyavadalu" },
-
-    // EAST
     "West Bengal": { native: "Bengali", hello: "Nomoshkar 🙏", thank: "Dhanyabad" },
     "Odisha": { native: "Odia", hello: "Namaskar 🙏", thank: "Dhanyabad" },
     "Bihar": { native: "Bhojpuri", hello: "Pranam 🙏", thank: "Dhanyavaad" },
     "Assam": { native: "Assamese", hello: "Nomoshkar 🙏", thank: "Xobai" },
-
-    // FALLBACK
     "General": { native: "Hindi/English", hello: "Namaste/Hello 👋", thank: "Thank You" }
 };
 
@@ -53,25 +44,21 @@ const curatedCities = {
     "meerut": { lat: 28.9845, lon: 77.7064, state: "Uttar Pradesh" }
 };
 
-// --- 🌤️ SMART LOCATION ENGINE (Replaces getWeather) ---
+// --- 🌤️ SMART LOCATION ENGINE (Using Axios) ---
 async function getLocationData(city) {
     try {
         let latitude, longitude, stateName;
         const cityKey = city.toLowerCase().trim();
 
-        // Check DB
+        // 1. Check DB
         if (curatedCities[cityKey]) {
-            console.log(`✅ Found in DB: ${cityKey}`);
             latitude = curatedCities[cityKey].lat;
             longitude = curatedCities[cityKey].lon;
             stateName = curatedCities[cityKey].state;
         }
-        // Check API
+        // 2. Check API via Axios
         else {
-            console.log(`🌍 Searching API for: ${city}`);
             const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-
-            // ✅ USING AXIOS INSTEAD OF FETCH
             const geoRes = await axios.get(geoUrl);
             const geoData = geoRes.data;
 
@@ -84,14 +71,11 @@ async function getLocationData(city) {
             }
         }
 
-        // Language Match
         let langData = stateLanguages[stateName];
         if (!langData) langData = stateLanguages["General"];
 
-        // Weather Match
+        // 3. Fetch Weather via Axios
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
-
-        // ✅ USING AXIOS INSTEAD OF FETCH
         const weatherRes = await axios.get(weatherUrl);
         const weatherData = weatherRes.data;
 
@@ -110,7 +94,7 @@ async function getLocationData(city) {
         };
 
     } catch (e) {
-        console.log("❌ Location Error:", e.message); // Ye Render logs mein asli error batayega
+        console.log("❌ Location Error:", e.message);
         return {
             weather: { temp: "--", cond: "Unavailable", text: "Server Busy" },
             language: stateLanguages["General"]
@@ -125,7 +109,7 @@ const generateGenericPlan = (city) => ({
         { name: `${city} Market`, type: "Shopping", cost: 1000 },
         { name: `${city} Temple`, type: "Spiritual", cost: 0 },
         { name: `${city} Garden`, type: "Nature", cost: 50 },
-        { name: `${city} Museum`, type: "History", cost: 200 }
+        { name: `${city} Good Places`, type: "History", cost: 200 }
     ],
     faqs: [{ q: `Best time?`, a: "Oct-March." }, { q: "Transport?", a: "Auto/Cab." }]
 });
@@ -134,14 +118,12 @@ const generateGenericPlan = (city) => ({
 app.post('/api/plan', async (req, res) => {
     const { location, days, budget } = req.body;
 
-    // 1. Get Smart Data (No getWeather call here!)
+    // Call Smart Engine (NO getWeather here!)
     const locationData = await getLocationData(location);
 
-    // 2. Get Places
     let dbData = curatedCities[location.toLowerCase()];
     if (!dbData || !dbData.places) dbData = generateGenericPlan(location);
 
-    // 3. Logic
     const dailyBudget = budget / days;
     const finalPlaces = dbData.places.filter(p => p.cost <= dailyBudget + 5000);
     const placesToUse = finalPlaces.length > 0 ? finalPlaces : dbData.places;
