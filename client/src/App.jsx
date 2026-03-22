@@ -7,7 +7,8 @@ import './App.css';
 
 function App() {
   // --- STATES ---
-  const [formData, setFormData] = useState({ location: '', days: 3, budget: 15000 });
+  // --- STATES ---
+  const [formData, setFormData] = useState({ location: '', days: 0, budget: 0, season: 'winter' });
   const [itinerary, setItinerary] = useState(null);
   const [weather, setWeather] = useState(null);
   const [faqs, setFaqs] = useState([]);
@@ -162,6 +163,13 @@ function App() {
             <div className="row">
               <input type="number" name="days" placeholder="Days" value={formData.days} onChange={handleChange} min="1" max="15" />
               <input type="number" name="budget" placeholder="Budget (₹)" value={formData.budget} onChange={handleChange} />
+
+              {/* ⛅ NAYA SEASON DROPDOWN YAHAN HAI */}
+              <select name="season" value={formData.season} onChange={handleChange} className="season-select">
+                <option value="winter">Winter ❄️</option>
+                <option value="summer">Summer ☀️</option>
+                <option value="monsoon">Monsoon 🌧️</option>
+              </select>
             </div>
             <button className="main-btn" onClick={generatePlan} disabled={loading}>
               {loading ? 'Planning...' : 'Plan My Trip 🚀'}
