@@ -8,7 +8,7 @@ import './App.css';
 function App() {
   // --- STATES ---
   // --- STATES ---
-  const [formData, setFormData] = useState({ location: '', days: 0, budget: 0, season: 'winter', month: 'January' });
+  const [formData, setFormData] = useState({ location: '', days: 0, budget: 0, month: 'January' });
   const [itinerary, setItinerary] = useState(null);
   const [weather, setWeather] = useState(null);
   const [faqs, setFaqs] = useState([]);
@@ -164,12 +164,6 @@ function App() {
               <input type="number" name="days" placeholder="Days" value={formData.days} onChange={handleChange} min="1" max="15" />
               <input type="number" name="budget" placeholder="Budget (₹)" value={formData.budget} onChange={handleChange} />
 
-              {/* ⛅ NAYA SEASON DROPDOWN YAHAN HAI */}
-              <select name="season" value={formData.season} onChange={handleChange} className="season-select">
-                <option value="winter">Winter ❄️</option>
-                <option value="summer">Summer ☀️</option>
-                <option value="monsoon">Monsoon 🌧️</option>
-              </select>
               {/* 🗓️ NAYA MONTH DROPDOWN */}
               <select name="month" value={formData.month} onChange={handleChange} className="season-select">
                 <option value="January">January ❄️</option>

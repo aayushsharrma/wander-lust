@@ -2,13 +2,13 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const axios = require('axios'); // State pata karne ke liye wapas laya gaya
+const axios = require('axios'); // State find karne ke liye
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// --- 🗺️ INDIA LANGUAGE MAP (Expanded) ---
+// --- 🗺️ INDIA LANGUAGE MAP ---
 const stateLanguages = {
     "Delhi": { native: "Hindi", hello: "Namaste 🙏", thank: "Dhanyavaad" },
     "Uttar Pradesh": { native: "Hindi", hello: "Namaste 🙏", thank: "Dhanyavaad" },
@@ -25,46 +25,66 @@ const stateLanguages = {
     "General": { native: "Hindi/English", hello: "Namaste/Hello 👋", thank: "Thank You" }
 };
 
-// --- 🌤️ SIMULATED WEATHER DATABASE ---
+// --- 🌤️ MEGA SIMULATED WEATHER DATABASE (All 28 States) ---
 const weatherZones = {
-    "Himachal Pradesh": { winter: [-5, 12], summer: [10, 25], monsoon: [15, 22] },
-    "Uttarakhand": { winter: [-2, 15], summer: [12, 28], monsoon: [16, 24] },
-    "Jammu and Kashmir": { winter: [-10, 8], summer: [10, 25], monsoon: [12, 20] },
-    "Rajasthan": { winter: [8, 22], summer: [30, 45], monsoon: [25, 34] },
+    "Andhra Pradesh": { winter: [18, 30], summer: [30, 42], monsoon: [25, 32] },
+    "Arunachal Pradesh": { winter: [-2, 12], summer: [15, 25], monsoon: [15, 22] },
+    "Assam": { winter: [10, 22], summer: [25, 35], monsoon: [24, 30] },
+    "Bihar": { winter: [10, 22], summer: [30, 42], monsoon: [26, 32] },
+    "Chhattisgarh": { winter: [12, 25], summer: [35, 45], monsoon: [25, 32] },
     "Goa": { winter: [20, 32], summer: [25, 35], monsoon: [24, 29] },
-    "Kerala": { winter: [22, 32], summer: [26, 35], monsoon: [24, 29] },
-    "Maharashtra": { winter: [15, 30], summer: [25, 38], monsoon: [22, 28] },
-    "Uttar Pradesh": { winter: [7, 22], summer: [25, 40], monsoon: [24, 32] },
+    "Gujarat": { winter: [12, 28], summer: [30, 42], monsoon: [26, 32] },
+    "Haryana": { winter: [5, 22], summer: [35, 45], monsoon: [25, 32] },
+    "Himachal Pradesh": { winter: [-5, 15], summer: [15, 30], monsoon: [15, 22] },
+    "Jharkhand": { winter: [10, 24], summer: [30, 40], monsoon: [24, 30] },
+    "Karnataka": { winter: [15, 28], summer: [28, 38], monsoon: [22, 28] },
+    "Kerala": { winter: [22, 32], summer: [28, 36], monsoon: [24, 29] },
+    "Madhya Pradesh": { winter: [10, 25], summer: [30, 45], monsoon: [24, 30] },
+    "Maharashtra": { winter: [15, 30], summer: [25, 40], monsoon: [22, 28] },
+    "Manipur": { winter: [4, 14], summer: [20, 30], monsoon: [22, 28] },
+    "Meghalaya": { winter: [4, 15], summer: [15, 25], monsoon: [12, 20] },
+    "Mizoram": { winter: [11, 21], summer: [20, 29], monsoon: [18, 25] },
+    "Nagaland": { winter: [4, 15], summer: [16, 30], monsoon: [18, 24] },
+    "Odisha": { winter: [15, 28], summer: [30, 40], monsoon: [25, 32] },
+    "Punjab": { winter: [4, 20], summer: [35, 45], monsoon: [25, 32] },
+    "Rajasthan": { winter: [10, 25], summer: [35, 48], monsoon: [25, 35] },
+    "Sikkim": { winter: [-5, 10], summer: [15, 25], monsoon: [12, 20] },
+    "Tamil Nadu": { winter: [20, 30], summer: [30, 40], monsoon: [25, 32] },
+    "Telangana": { winter: [15, 28], summer: [32, 42], monsoon: [24, 31] },
+    "Tripura": { winter: [10, 25], summer: [28, 35], monsoon: [25, 30] },
+    "Uttar Pradesh": { winter: [8, 24], summer: [30, 45], monsoon: [25, 32] },
+    "Uttarakhand": { winter: [0, 15], summer: [15, 35], monsoon: [15, 25] },
+    "West Bengal": { winter: [12, 25], summer: [30, 40], monsoon: [25, 32] },
     "Delhi": { winter: [5, 20], summer: [28, 42], monsoon: [25, 32] },
     "General": { winter: [10, 25], summer: [25, 38], monsoon: [22, 30] }
 };
 
 // --- 🧠 CURATED DATABASE ---
 const curatedCities = {
-    "manali": { state: "Himachal Pradesh" },
-    "goa": { state: "Goa" },
-    "rishikesh": { state: "Uttarakhand" },
-    "kerala": { state: "Kerala" },
-    "meerut": { state: "Uttar Pradesh" }
+    "manali": { state: "Himachal Pradesh" }, "kasol": { state: "Himachal Pradesh" }, "spiti": { state: "Himachal Pradesh" },
+    "rishikesh": { state: "Uttarakhand" }, "auli": { state: "Uttarakhand" }, "nainital": { state: "Uttarakhand" },
+    "meerut": { state: "Uttar Pradesh" }, "agra": { state: "Uttar Pradesh" }, "varanasi": { state: "Uttar Pradesh" },
+    "amritsar": { state: "Punjab" }, "delhi": { state: "Delhi" }, "goa": { state: "Goa" },
+    "udaipur": { state: "Rajasthan" }, "jaisalmer": { state: "Rajasthan" }, "jaipur": { state: "Rajasthan" },
+    "mumbai": { state: "Maharashtra" }, "lonavala": { state: "Maharashtra" }, "rann of kutch": { state: "Gujarat" },
+    "kerala": { state: "Kerala" }, "munnar": { state: "Kerala" }, "alleppey": { state: "Kerala" },
+    "coorg": { state: "Karnataka" }, "hampi": { state: "Karnataka" }, "bengaluru": { state: "Karnataka" },
+    "ooty": { state: "Tamil Nadu" }, "chennai": { state: "Tamil Nadu" }, "tirupati": { state: "Andhra Pradesh" },
+    "hyderabad": { state: "Telangana" }, "kolkata": { state: "West Bengal" }, "darjeeling": { state: "West Bengal" },
+    "puri": { state: "Odisha" }, "bodh gaya": { state: "Bihar" }, "kaziranga": { state: "Assam" },
+    "guwahati": { state: "Assam" }, "tawang": { state: "Arunachal Pradesh" }, "gangtok": { state: "Sikkim" },
+    "shillong": { state: "Meghalaya" }
 };
-
-// 🗓️ SMART MONTH-TO-SEASON CONVERTER
-function getSeasonFromMonth(monthName) {
-    const month = monthName.toLowerCase();
-    const winter = ['november', 'december', 'january', 'february'];
-    const summer = ['march', 'april', 'may', 'june'];
-    // Baaki bache huye (July, Aug, Sept, Oct) Monsoon hain
-
-    if (winter.includes(month)) return 'winter';
-    if (summer.includes(month)) return 'summer';
-    return 'monsoon';
-}
 
 // 🎯 SIMULATED WEATHER ENGINE
 function getSimulatedWeather(stateName, requestedSeason) {
-    const season = requestedSeason || 'summer';
+    // 💡 Frontend se jo season aaya hai usko pakdo
+    const season = requestedSeason ? requestedSeason.toLowerCase() : 'summer';
     const stateWeather = weatherZones[stateName] || weatherZones["General"];
-    const [min, max] = stateWeather[season];
+
+    // Safety check incase requestedSeason is invalid
+    const seasonData = stateWeather[season] || stateWeather['summer'];
+    const [min, max] = seasonData;
 
     const randomTemp = Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -77,35 +97,30 @@ function getSimulatedWeather(stateName, requestedSeason) {
     return { temp: `${randomTemp}°C`, cond: `${cond} ${emoji}` };
 }
 
-// 🚀 HYBRID LOCATION ENGINE (API for State + Sim for Weather)
+// 🚀 LOCATION ENGINE
 async function getLocationData(city, requestedSeason) {
-    let stateName = "General"; // Default
+    let stateName = "General";
     const cityKey = city.toLowerCase().trim();
 
     try {
-        // 1. Agar Database mein hai toh direct uthao
         if (curatedCities[cityKey]) {
             stateName = curatedCities[cityKey].state;
-        }
-        // 2. Agar nahi hai toh Axios API se State pata lagao (Sahi Lingo ke liye)
-        else {
+        } else {
             const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
             const geoRes = await axios.get(geoUrl);
             if (geoRes.data && geoRes.data.results && geoRes.data.results.length > 0) {
-                stateName = geoRes.data.results[0].admin1; // Returns state (e.g., "Kerala")
+                stateName = geoRes.data.results[0].admin1;
             }
         }
     } catch (e) {
-        console.log("Geocoding Error (Fallback to General):", e.message);
+        console.log("Geocoding Error:", e.message);
     }
 
-    // 🗣️ MATCH LOCAL LINGO based on detected state
     let langData = stateLanguages[stateName] || stateLanguages["General"];
-
-    // 🌤️ GENERATE FAKE WEATHER
     const simWeather = getSimulatedWeather(stateName, requestedSeason);
 
     return {
+        // Text mein proper Season dikhayega
         weather: { temp: simWeather.temp, cond: simWeather.cond, text: `Planned for ${requestedSeason || 'Summer'}` },
         language: langData
     };
@@ -123,46 +138,41 @@ const generateGenericPlan = (city) => ({
 });
 
 // --- API ENDPOINT ---
-// --- API ENDPOINT ---
 app.post('/api/plan', async (req, res) => {
-    // 💡 Frontend se ab 'month' receive ho raha hai
-    const { location, days, budget, month } = req.body;
+    try {
+        // 💡 YAHAN SE HATA DIYA HAI GETWEATHER KA NAAM
+        const { location, days, budget, season } = req.body;
 
-    // 💡 Month ko padh kar automatically Season pata lagao
-    const detectedSeason = getSeasonFromMonth(month || 'january');
+        const locationData = await getLocationData(location, season);
 
-    // 💡 Season ko engine mein bhejo temperature nikalne ke liye
-    const locationData = await getLocationData(location, detectedSeason);
+        let dbData = curatedCities[location.toLowerCase()];
+        if (!dbData || !dbData.places) dbData = generateGenericPlan(location);
 
-    let dbData = curatedCities[location.toLowerCase()];
-    if (!dbData || !dbData.places) dbData = generateGenericPlan(location);
+        const dailyBudget = budget / days;
+        const finalPlaces = dbData.places ? dbData.places.filter(p => p.cost <= dailyBudget + 5000) : [];
+        const placesToUse = finalPlaces.length > 0 ? finalPlaces : dbData.places;
 
-    const dailyBudget = budget / days;
-    const finalPlaces = dbData.places ? dbData.places.filter(p => p.cost <= dailyBudget + 5000) : [];
-    const placesToUse = finalPlaces.length > 0 ? finalPlaces : dbData.places;
+        const plan = [];
+        let currentCost = 0;
+        for (let i = 0; i < days; i++) {
+            const place = placesToUse[i % placesToUse.length];
+            plan.push({ day: i + 1, place: place.name, activity: place.type, cost: place.cost });
+            currentCost += place.cost;
+        }
 
-    const plan = [];
-    let currentCost = 0;
-    for (let i = 0; i < days; i++) {
-        const place = placesToUse[i % placesToUse.length];
-        plan.push({ day: i + 1, place: place.name, activity: place.type, cost: place.cost });
-        currentCost += place.cost;
+        res.json({
+            success: true,
+            plan,
+            totalCost: currentCost,
+            aiDescription: `Explore ${location} this ${season || 'Summer'}! ✨`,
+            weather: locationData.weather,
+            language: locationData.language,
+            faqs: dbData.faqs
+        });
+    } catch (error) {
+        console.log("Server Crash Prevented:", error);
+        res.status(500).json({ success: false, message: "Server error fixed" });
     }
-
-    res.json({
-        success: true,
-        plan,
-        totalCost: currentCost,
-        // 💡 AI Description mein ab Month ka naam aayega (e.g., "Explore Manali this December!")
-        aiDescription: `Explore ${location} this ${month || 'January'}! ✨`,
-        aiDescription: `Explore ${location} this ${season || 'summer'}! ✨`,
-        weather: {
-            temp: locationData.weather.temp,
-            cond: locationData.weather.cond,
-            text: `Forecast for ${month || 'January'}` // 💡 Weather text mein bhi Month update
-        },
-        language: locationData.language,
-        faqs: dbData.faqs
-    });
 });
+
 app.listen(5000, () => console.log("🚀 Server running on 5000"));
