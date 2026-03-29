@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const axios = require('axios'); // State find karne ke liye
+const axios = require('axios');
 
 const app = express();
 app.use(cors());
@@ -22,6 +22,9 @@ const stateLanguages = {
     "Tamil Nadu": { native: "Tamil", hello: "Vanakkam 🙏", thank: "Nandri" },
     "Karnataka": { native: "Kannada", hello: "Namaskara 🙏", thank: "Dhanyavadagalu" },
     "West Bengal": { native: "Bengali", hello: "Nomoshkar 🙏", thank: "Dhanyabad" },
+    "Punjab": { native: "Punjabi", hello: "Sat Sri Akal 🙏", thank: "Dhanwad" },
+    "Odisha": { native: "Odia", hello: "Namaskar 🙏", thank: "Dhanyabad" },
+    "Bihar": { native: "Bhojpuri", hello: "Pranam 🙏", thank: "Dhanyavaad" },
     "General": { native: "Hindi/English", hello: "Namaste/Hello 👋", thank: "Thank You" }
 };
 
@@ -59,30 +62,68 @@ const weatherZones = {
     "General": { winter: [10, 25], summer: [25, 38], monsoon: [22, 30] }
 };
 
-// --- 🧠 CURATED DATABASE ---
+// --- 🧠 ALL INDIA CURATED CITIES (Capitals + Tourist Hubs) ---
 const curatedCities = {
-    "manali": { state: "Himachal Pradesh" }, "kasol": { state: "Himachal Pradesh" }, "spiti": { state: "Himachal Pradesh" },
-    "rishikesh": { state: "Uttarakhand" }, "auli": { state: "Uttarakhand" }, "nainital": { state: "Uttarakhand" },
-    "meerut": { state: "Uttar Pradesh" }, "agra": { state: "Uttar Pradesh" }, "varanasi": { state: "Uttar Pradesh" },
-    "amritsar": { state: "Punjab" }, "delhi": { state: "Delhi" }, "goa": { state: "Goa" },
-    "udaipur": { state: "Rajasthan" }, "jaisalmer": { state: "Rajasthan" }, "jaipur": { state: "Rajasthan" },
-    "mumbai": { state: "Maharashtra" }, "lonavala": { state: "Maharashtra" }, "rann of kutch": { state: "Gujarat" },
-    "kerala": { state: "Kerala" }, "munnar": { state: "Kerala" }, "alleppey": { state: "Kerala" },
-    "coorg": { state: "Karnataka" }, "hampi": { state: "Karnataka" }, "bengaluru": { state: "Karnataka" },
-    "ooty": { state: "Tamil Nadu" }, "chennai": { state: "Tamil Nadu" }, "tirupati": { state: "Andhra Pradesh" },
-    "hyderabad": { state: "Telangana" }, "kolkata": { state: "West Bengal" }, "darjeeling": { state: "West Bengal" },
-    "puri": { state: "Odisha" }, "bodh gaya": { state: "Bihar" }, "kaziranga": { state: "Assam" },
-    "guwahati": { state: "Assam" }, "tawang": { state: "Arunachal Pradesh" }, "gangtok": { state: "Sikkim" },
-    "shillong": { state: "Meghalaya" }
+    // North India
+    "delhi": { state: "Delhi" }, "new delhi": { state: "Delhi" },
+    "shimla": { state: "Himachal Pradesh" }, "manali": { state: "Himachal Pradesh" }, "kasol": { state: "Himachal Pradesh" }, "dharamshala": { state: "Himachal Pradesh" }, "spiti": { state: "Himachal Pradesh" },
+    "dehradun": { state: "Uttarakhand" }, "rishikesh": { state: "Uttarakhand" }, "auli": { state: "Uttarakhand" }, "nainital": { state: "Uttarakhand" }, "mussoorie": { state: "Uttarakhand" },
+    "chandigarh": { state: "Punjab" }, "amritsar": { state: "Punjab" }, "ludhiana": { state: "Punjab" },
+    "kurukshetra": { state: "Haryana" }, "panchkula": { state: "Haryana" }, "gurugram": { state: "Haryana" },
+    "lucknow": { state: "Uttar Pradesh" }, "agra": { state: "Uttar Pradesh" }, "varanasi": { state: "Uttar Pradesh" }, "mathura": { state: "Uttar Pradesh" }, "meerut": { state: "Uttar Pradesh" }, "kanpur": { state: "Uttar Pradesh" },
+
+    // West India
+    "jaipur": { state: "Rajasthan" }, "udaipur": { state: "Rajasthan" }, "jaisalmer": { state: "Rajasthan" }, "jodhpur": { state: "Rajasthan" }, "pushkar": { state: "Rajasthan" },
+    "gandhinagar": { state: "Gujarat" }, "ahmedabad": { state: "Gujarat" }, "surat": { state: "Gujarat" }, "somnath": { state: "Gujarat" }, "rann of kutch": { state: "Gujarat" },
+    "mumbai": { state: "Maharashtra" }, "pune": { state: "Maharashtra" }, "lonavala": { state: "Maharashtra" }, "mahabaleshwar": { state: "Maharashtra" }, "nagpur": { state: "Maharashtra" },
+    "panaji": { state: "Goa" }, "goa": { state: "Goa" }, "baga": { state: "Goa" },
+
+    // Central India
+    "bhopal": { state: "Madhya Pradesh" }, "indore": { state: "Madhya Pradesh" }, "khajuraho": { state: "Madhya Pradesh" }, "pachmarhi": { state: "Madhya Pradesh" }, "ujjain": { state: "Madhya Pradesh" },
+    "raipur": { state: "Chhattisgarh" }, "bastar": { state: "Chhattisgarh" },
+
+    // South India
+    "bengaluru": { state: "Karnataka" }, "mysore": { state: "Karnataka" }, "coorg": { state: "Karnataka" }, "hampi": { state: "Karnataka" },
+    "thiruvananthapuram": { state: "Kerala" }, "kochi": { state: "Kerala" }, "kerala": { state: "Kerala" }, "munnar": { state: "Kerala" }, "alleppey": { state: "Kerala" }, "wayanad": { state: "Kerala" },
+    "chennai": { state: "Tamil Nadu" }, "ooty": { state: "Tamil Nadu" }, "madurai": { state: "Tamil Nadu" }, "kodaikanal": { state: "Tamil Nadu" },
+    "amaravati": { state: "Andhra Pradesh" }, "tirupati": { state: "Andhra Pradesh" }, "vizag": { state: "Andhra Pradesh" }, "araku": { state: "Andhra Pradesh" },
+    "hyderabad": { state: "Telangana" }, "warangal": { state: "Telangana" },
+
+    // East India
+    "kolkata": { state: "West Bengal" }, "darjeeling": { state: "West Bengal" }, "sundarbans": { state: "West Bengal" },
+    "bhubaneswar": { state: "Odisha" }, "puri": { state: "Odisha" }, "konark": { state: "Odisha" },
+    "patna": { state: "Bihar" }, "bodh gaya": { state: "Bihar" }, "nalanda": { state: "Bihar" }, "rajgir": { state: "Bihar" },
+    "ranchi": { state: "Jharkhand" }, "deoghar": { state: "Jharkhand" },
+
+    // North-East India
+    "dispur": { state: "Assam" }, "guwahati": { state: "Assam" }, "kaziranga": { state: "Assam" }, "majuli": { state: "Assam" },
+    "itanagar": { state: "Arunachal Pradesh" }, "tawang": { state: "Arunachal Pradesh" }, "ziro": { state: "Arunachal Pradesh" },
+    "shillong": { state: "Meghalaya" }, "cherrapunji": { state: "Meghalaya" },
+    "gangtok": { state: "Sikkim" }, "pelling": { state: "Sikkim" },
+    "imphal": { state: "Manipur" },
+    "aizawl": { state: "Mizoram" },
+    "kohima": { state: "Nagaland" },
+    "agartala": { state: "Tripura" }
 };
 
+// 🗓️ SMART MONTH-TO-SEASON CONVERTER
+function getSeasonFromMonth(monthName) {
+    if (!monthName) return 'summer';
+    const month = monthName.toLowerCase();
+
+    const winter = ['november', 'december', 'january', 'february'];
+    const summer = ['march', 'april', 'may', 'june'];
+
+    if (winter.includes(month)) return 'winter';
+    if (summer.includes(month)) return 'summer';
+    return 'monsoon'; // July, August, September, October
+}
+
 // 🎯 SIMULATED WEATHER ENGINE
-function getSimulatedWeather(stateName, requestedSeason) {
-    // 💡 Frontend se jo season aaya hai usko pakdo
-    const season = requestedSeason ? requestedSeason.toLowerCase() : 'summer';
+function getSimulatedWeather(stateName, requestedMonth) {
+    const season = getSeasonFromMonth(requestedMonth);
     const stateWeather = weatherZones[stateName] || weatherZones["General"];
 
-    // Safety check incase requestedSeason is invalid
     const seasonData = stateWeather[season] || stateWeather['summer'];
     const [min, max] = seasonData;
 
@@ -98,7 +139,7 @@ function getSimulatedWeather(stateName, requestedSeason) {
 }
 
 // 🚀 LOCATION ENGINE
-async function getLocationData(city, requestedSeason) {
+async function getLocationData(city, requestedMonth) {
     let stateName = "General";
     const cityKey = city.toLowerCase().trim();
 
@@ -106,6 +147,7 @@ async function getLocationData(city, requestedSeason) {
         if (curatedCities[cityKey]) {
             stateName = curatedCities[cityKey].state;
         } else {
+            // Fallback: Agar city hamare 100+ cities database me nahi hai, tabhi API call hogi
             const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
             const geoRes = await axios.get(geoUrl);
             if (geoRes.data && geoRes.data.results && geoRes.data.results.length > 0) {
@@ -117,11 +159,10 @@ async function getLocationData(city, requestedSeason) {
     }
 
     let langData = stateLanguages[stateName] || stateLanguages["General"];
-    const simWeather = getSimulatedWeather(stateName, requestedSeason);
+    const simWeather = getSimulatedWeather(stateName, requestedMonth);
 
     return {
-        // Text mein proper Season dikhayega
-        weather: { temp: simWeather.temp, cond: simWeather.cond, text: `Planned for ${requestedSeason || 'Summer'}` },
+        weather: { temp: simWeather.temp, cond: simWeather.cond, text: `Forecast for ${requestedMonth || 'January'}` },
         language: langData
     };
 }
@@ -130,20 +171,21 @@ async function getLocationData(city, requestedSeason) {
 const generateGenericPlan = (city) => ({
     places: [
         { name: `${city} City Center`, type: "City", cost: 500 },
-        { name: `${city} Market`, type: "Shopping", cost: 1000 },
-        { name: `${city} Main Temple`, type: "Spiritual", cost: 0 },
-        { name: `${city} Viewpoint`, type: "Nature", cost: 50 }
+        { name: `${city} Main Market`, type: "Shopping", cost: 1000 },
+        { name: `${city} Famous Temple`, type: "Spiritual", cost: 0 },
+        { name: `${city} Scenic Viewpoint`, type: "Nature", cost: 50 }
     ],
-    faqs: [{ q: `Local Transport?`, a: "Auto/Cab." }]
+    faqs: [{ q: `Local Transport in ${city}?`, a: "Auto, Cabs, and local buses are easily available." }]
 });
 
 // --- API ENDPOINT ---
 app.post('/api/plan', async (req, res) => {
     try {
-        // 💡 YAHAN SE HATA DIYA HAI GETWEATHER KA NAAM
-        const { location, days, budget, season } = req.body;
+        // Frontend se destination, days, budget, aur MONTH receive kar rahe hain
+        const { location, days, budget, month } = req.body;
+        const selectedMonth = month || 'January'; // Default fallback
 
-        const locationData = await getLocationData(location, season);
+        const locationData = await getLocationData(location, selectedMonth);
 
         let dbData = curatedCities[location.toLowerCase()];
         if (!dbData || !dbData.places) dbData = generateGenericPlan(location);
@@ -164,7 +206,7 @@ app.post('/api/plan', async (req, res) => {
             success: true,
             plan,
             totalCost: currentCost,
-            aiDescription: `Explore ${location} this ${season || 'Summer'}! ✨`,
+            aiDescription: `Explore ${location} this ${selectedMonth}! ✨`,
             weather: locationData.weather,
             language: locationData.language,
             faqs: dbData.faqs
