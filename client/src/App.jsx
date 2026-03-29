@@ -8,7 +8,7 @@ import './App.css';
 function App() {
   // --- STATES ---
   // --- STATES ---
-  const [formData, setFormData] = useState({ location: '', days: 0, budget: 0, season: 'winter' });
+  const [formData, setFormData] = useState({ location: '', days: 0, budget: 0, season: 'winter', month: 'January' });
   const [itinerary, setItinerary] = useState(null);
   const [weather, setWeather] = useState(null);
   const [faqs, setFaqs] = useState([]);
@@ -169,6 +169,21 @@ function App() {
                 <option value="winter">Winter ❄️</option>
                 <option value="summer">Summer ☀️</option>
                 <option value="monsoon">Monsoon 🌧️</option>
+              </select>
+              {/* 🗓️ NAYA MONTH DROPDOWN */}
+              <select name="month" value={formData.month} onChange={handleChange} className="season-select">
+                <option value="January">January ❄️</option>
+                <option value="February">February 🌼</option>
+                <option value="March">March 🌸</option>
+                <option value="April">April ☀️</option>
+                <option value="May">May 🥵</option>
+                <option value="June">June 🏖️</option>
+                <option value="July">July 🌧️</option>
+                <option value="August">August ☔</option>
+                <option value="September">September 🌦️</option>
+                <option value="October">October 🍂</option>
+                <option value="November">November 🧣</option>
+                <option value="December">December ⛄</option>
               </select>
             </div>
             <button className="main-btn" onClick={generatePlan} disabled={loading}>

@@ -48,6 +48,18 @@ const curatedCities = {
     "meerut": { state: "Uttar Pradesh" }
 };
 
+// 🗓️ SMART MONTH-TO-SEASON CONVERTER
+function getSeasonFromMonth(monthName) {
+    const month = monthName.toLowerCase();
+    const winter = ['november', 'december', 'january', 'february'];
+    const summer = ['march', 'april', 'may', 'june'];
+    // Baaki bache huye (July, Aug, Sept, Oct) Monsoon hain
+
+    if (winter.includes(month)) return 'winter';
+    if (summer.includes(month)) return 'summer';
+    return 'monsoon';
+}
+
 // 🎯 SIMULATED WEATHER ENGINE
 function getSimulatedWeather(stateName, requestedSeason) {
     const season = requestedSeason || 'summer';
@@ -111,10 +123,16 @@ const generateGenericPlan = (city) => ({
 });
 
 // --- API ENDPOINT ---
+// --- API ENDPOINT ---
 app.post('/api/plan', async (req, res) => {
-    const { location, days, budget, season } = req.body;
+    // 💡 Frontend se ab 'month' receive ho raha hai
+    const { location, days, budget, month } = req.body;
 
-    const locationData = await getLocationData(location, season);
+    // 💡 Month ko padh kar automatically Season pata lagao
+    const detectedSeason = getSeasonFromMonth(month || 'january');
+
+    // 💡 Season ko engine mein bhejo temperature nikalne ke liye
+    const locationData = await getLocationData(location, detectedSeason);
 
     let dbData = curatedCities[location.toLowerCase()];
     if (!dbData || !dbData.places) dbData = generateGenericPlan(location);
@@ -135,11 +153,16 @@ app.post('/api/plan', async (req, res) => {
         success: true,
         plan,
         totalCost: currentCost,
+        // 💡 AI Description mein ab Month ka naam aayega (e.g., "Explore Manali this December!")
+        aiDescription: `Explore ${location} this ${month || 'January'}! ✨`,
         aiDescription: `Explore ${location} this ${season || 'summer'}! ✨`,
-        weather: locationData.weather,
+        weather: {
+            temp: locationData.weather.temp,
+            cond: locationData.weather.cond,
+            text: `Forecast for ${month || 'January'}` // 💡 Weather text mein bhi Month update
+        },
         language: locationData.language,
         faqs: dbData.faqs
     });
 });
-
 app.listen(5000, () => console.log("🚀 Server running on 5000"));
